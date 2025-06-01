@@ -104,7 +104,7 @@ api/
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/seuuser/easyfinance-api
+git clone https://github.com/KaikalDev/EasyFinanceAPI-BackEnd.git
 cd easyfinance-api
 
 # 2. Instale as dependências
