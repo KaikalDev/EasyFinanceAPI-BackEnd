@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from api.routers import UserRouters, TransactionRouters, GoalRouters, PiggyRouters
 from fastapi.openapi.utils import get_openapi
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -33,3 +34,16 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
+
+origins = [
+    "https://easy-finance-ten.vercel.app",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
