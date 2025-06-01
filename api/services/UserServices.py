@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy import delete
+from fastapi import Response
 from api.data.models import ModelUser, ModelCategory, ModelGoal, ModelPiggybank, ModelTransaction
 from passlib.context import CryptContext
 from jose import jwt
@@ -23,7 +24,7 @@ class UsuarioService:
         }
         return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-    async def create(self, user: ModelUser):
+    async def create(self, user: ModelUser, response: Response):
         hashed = pwd_context.hash(user.password)
         data = user.dict()
         data["password"] = hashed
@@ -44,16 +45,34 @@ class UsuarioService:
         await self.db.refresh(userToAdd)
 
         token = self._criar_token(userToAdd)
-        return {"access_token": token, "token_type": "bearer"}
+        response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            max_age=60 * 60 * 24 * 7,
+            samesite="Lax",
+            secure=False
+        )
 
-    async def login(self, email: str, password: str):
+        return {"msg": "Usuário criado com sucesso"}
+
+    async def login(self, email: str, password: str, response: Response):
         result = await self.db.execute(select(ModelUser).where(ModelUser.email == email))
         user = result.scalar_one_or_none()
         if not user or not pwd_context.verify(password, user.password):
             raise HTTPException(status_code=401, detail="Email ou senha inválidos")
 
         token = self._criar_token(user)
-        return {"access_token": token, "token_type": "bearer"}
+        response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            max_age=60 * 60 * 24 * 7,
+            samesite="Lax",
+            secure=False
+        )
+
+        return {"msg": "Login efetuado com sucesso"}
 
     async def editNome(self, id: int, newName: str):
         user = await self.db.get(ModelUser, id)

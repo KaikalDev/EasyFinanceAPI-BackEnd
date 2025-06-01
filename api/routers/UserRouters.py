@@ -5,13 +5,14 @@ from api.schemas.User import User, UserLogin, UserResponse
 from api.schemas.Transaction import TransactionResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.utils.auth import get_user_id_from_token
+from fastapi import Response
 
 router = APIRouter()
 
 @router.post("/add")
-async def create(user: User, db: AsyncSession = Depends(get_db)):
+async def create(user: User, response: Response, db: AsyncSession = Depends(get_db)):
     service = UsuarioService(db)
-    return await service.create(user)
+    return await service.create(user, response)
 
 @router.get("/get/{id}", response_model=UserResponse)
 async def get_By_Id(id: int, db: AsyncSession = Depends(get_db)):
@@ -35,19 +36,9 @@ async def edit_senha(id: int, password: str, db: AsyncSession = Depends(get_db))
     return UserResponse.from_orm(user)
 
 @router.post("/login")
-async def Login(user: UserLogin, db: AsyncSession = Depends(get_db)):
+async def Login(user: UserLogin, response: Response, db: AsyncSession = Depends(get_db)):
     service = UsuarioService(db)
-    usuario = await service.verificaSenha(user.email, user.password)
-    
-    if not usuario:
-        raise HTTPException(status_code=401, detail="Credenciais inválidas")
-    
-    token = service._criar_token(usuario)
-    
-    return {
-        "access_token": token,
-        "token_type": "bearer"
-    }
+    return await service.login(user.email, user.password, response)
 
 @router.get("/me")
 async def get_me(user_id: int = Depends(get_user_id_from_token)):
