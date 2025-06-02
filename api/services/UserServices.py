@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy import delete
 from fastapi import Response
 from api.data.models import ModelUser, ModelCategory, ModelGoal, ModelPiggybank, ModelTransaction
+from api.schemas.User import User
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta
@@ -24,13 +25,13 @@ class UsuarioService:
         }
         return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-    async def create(self, user: ModelUser, response: Response):
+    async def create(self, user: User, response: Response):
         hashed = pwd_context.hash(user.password)
         data = user.dict()
         data["password"] = hashed
         userToAdd = ModelUser(**data)
         self.db.add(userToAdd)
-        await self.db.flush()
+
         categorias = [
             "Alimantação", "Aluguel", "Saúde", "Lazer",
             "Cofrinho", "Agua", "Luz", "Internet"
