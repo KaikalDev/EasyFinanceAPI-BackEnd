@@ -8,13 +8,8 @@ from typing import AsyncGenerator
 load_dotenv()
 
 tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
-port = tmpPostgres.port or 5432
 
-DATABASE_URL = (
-    f"postgresql+asyncpg://{tmpPostgres.username}:"
-    f"{tmpPostgres.password}@{tmpPostgres.hostname}:{port}"
-    f"{tmpPostgres.path}?sslmode=require"
-)
+DATABASE_URL = f"postgresql+asyncpg://{tmpPostgres.username}:{tmpPostgres.password}@{tmpPostgres.hostname}{tmpPostgres.path}?ssl=require"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 
