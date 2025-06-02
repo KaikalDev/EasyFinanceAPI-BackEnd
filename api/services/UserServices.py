@@ -29,8 +29,12 @@ class UsuarioService:
         hashed = pwd_context.hash(user.password)
         data = user.dict()
         data["password"] = hashed
+
         userToAdd = ModelUser(**data)
         self.db.add(userToAdd)
+        await self.db.flush()
+
+        await self.db.refresh(userToAdd)
 
         categorias = [
             "Alimantação", "Aluguel", "Saúde", "Lazer",
@@ -39,7 +43,6 @@ class UsuarioService:
         categorias_obj = [
             ModelCategory(user_id=userToAdd.id, name=cat) for cat in categorias
         ]
-
         self.db.add_all(categorias_obj)
 
         await self.db.commit()
