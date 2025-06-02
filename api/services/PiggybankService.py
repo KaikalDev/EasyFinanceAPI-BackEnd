@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.data.models import ModelPiggybank, ModelTransaction
 from sqlalchemy.future import select
+from sqlalchemy import delete
 
 class PiggyBankService:
     def __init__(self, db: AsyncSession):
@@ -32,6 +33,7 @@ class PiggyBankService:
         return piggy
     
     async def delete(self, id: int, userId: int):
+        await self.db.execute(delete(ModelTransaction).where(ModelTransaction.user_id == id))
         piggy = await self.db.get(ModelPiggybank, id)
         if not piggy:
             raise HTTPException(status_code=404, detail="Piggy not found")

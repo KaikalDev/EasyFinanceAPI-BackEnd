@@ -18,10 +18,10 @@ app.add_middleware(
 )
 
 
-app.include_router(UserRouters.router, prefix="/usuario", tags=["Usuario"])
-app.include_router(TransactionRouters.router, prefix="/Transaction", tags=["Transaction"])
-app.include_router(GoalRouters.router, prefix="/Goal", tags=["Goal"])
-app.include_router(PiggyRouters.router, prefix="/PiggyBank", tags=["PiggyBank"])
+app.include_router(UserRouters.router, prefix="/user", tags=["Usuario"])
+app.include_router(TransactionRouters.router, prefix="/transaction", tags=["Transaction"])
+app.include_router(GoalRouters.router, prefix="/goal", tags=["Goal"])
+app.include_router(PiggyRouters.router, prefix="/piggybank", tags=["PiggyBank"])
 
 def custom_openapi():
     if app.openapi_schema:
