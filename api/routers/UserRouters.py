@@ -40,9 +40,10 @@ async def Login(user: UserLogin, response: Response, db: AsyncSession = Depends(
     service = UsuarioService(db)
     return await service.login(user.email, user.password, response)
 
-@router.get("/me")
-async def get_By_Token(user_id: int = Depends(get_user_id_from_token)):
-    return await get_By_Id(user_id)
+@router.get("/me", response_model=UserResponse)
+async def get_By_Token(user_id: int = Depends(get_user_id_from_token), db: AsyncSession = Depends(get_db)):
+    service = UsuarioService(db)
+    return await service.getById(user_id)
 
 @router.get("/historico", response_model=list[TransactionResponse])
 async def get_historico(user_id: int = Depends(get_user_id_from_token), db: AsyncSession = Depends(get_db)):

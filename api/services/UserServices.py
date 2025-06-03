@@ -99,7 +99,12 @@ class UsuarioService:
 
     async def getById(self, id: int):
         result = await self.db.execute(select(ModelUser).where(ModelUser.id == id))
-        return result.scalar_one_or_none()
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+        return user
 
     async def verificaSenha(self, email: str, password: str):
         result = await self.db.execute(select(ModelUser).where(ModelUser.email == email))
