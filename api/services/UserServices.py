@@ -54,8 +54,8 @@ class UsuarioService:
             value=token,
             httponly=True,
             max_age=60 * 60 * 24 * 7,
-            samesite="Lax",
-            secure=False
+            samesite="None",
+            secure=True
         )
 
         return {"msg": "Usuário criado com sucesso"}
@@ -72,8 +72,8 @@ class UsuarioService:
             value=token,
             httponly=True,
             max_age=60 * 60 * 24 * 7,
-            samesite="Lax",
-            secure=False
+            samesite="None",
+            secure=True
         )
 
         return {"msg": "Login efetuado com sucesso"}
