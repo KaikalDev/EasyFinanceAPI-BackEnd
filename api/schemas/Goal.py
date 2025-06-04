@@ -1,10 +1,11 @@
 from pydantic import BaseModel
-from datetime import date
+from typing import List
+from api.schemas.Transaction import Transaction
 
 class Goal(BaseModel):
     name: str
-    goal_value: float
-    goal_date: date
+    GoalValue: float
+    CurrentValue: float
 
     class Config:
         from_attributes = True
@@ -12,9 +13,9 @@ class Goal(BaseModel):
 class GoalResponse(BaseModel):
     id: int
     name: str
-    goal_value: float
-    goal_date: date
+    total: float
     user_id: int
+    historico: list[Transaction]
 
     class Config:
         from_attributes = True

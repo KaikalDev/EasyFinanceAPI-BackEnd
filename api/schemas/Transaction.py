@@ -7,7 +7,7 @@ class Transaction(BaseModel):
     value: float
     date: date
     category: str
-    cofrinho_id: Optional[int] = None
+    goal_id: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -18,7 +18,7 @@ class TransactionResponse(BaseModel):
     value: float
     date: date
     category: str
-    cofrinho_id: Optional[int] = None
+    goal_id: Optional[int] = None
 
     class Config:
         from_attributes = True

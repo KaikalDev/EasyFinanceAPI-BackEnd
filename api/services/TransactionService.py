@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.data.models import ModelTransaction
+from api.data.models.ModelTransaction import ModelTransaction
+from api.data.models.ModelGoal import ModelGoal
 
 class TransactionService:
     def __init__(self, db: AsyncSession):
@@ -13,8 +14,16 @@ class TransactionService:
             date=tran.date,
             category=tran.category,
             user_id=userId,
-            cofrinho_id=tran.cofrinho_id
+            goal_id=tran.goal_id
         )
+        if tran.goal_id:
+            goal = await self.db.get(ModelGoal, tran.goal_id)
+            if not goal:
+                raise HTTPException(status_code=404, detail="Meta não encontrada")
+            if goal.user_id != userId:
+                raise HTTPException(status_code=403, detail="Acesso negado à meta")
+
+            goal.currentValue += tran.value
         self.db.add(db_tran)
         await self.db.commit()
         await self.db.refresh(db_tran)
