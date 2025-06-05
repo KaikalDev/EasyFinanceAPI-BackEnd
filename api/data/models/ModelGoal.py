@@ -13,6 +13,6 @@ class ModelGoal(Base):
     CurrentValue = Column(Float, default=0.0)
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    user = relationship("ModelUser", back_populates="goals")
+    user = relationship("ModelUser", back_populates="goal")
 
     historico = relationship("ModelTransaction", back_populates="goal", cascade="all, delete-orphan")

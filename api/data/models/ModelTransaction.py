@@ -15,7 +15,7 @@ class ModelTransaction(Base):
     category = Column(String, nullable=False)
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    user = relationship("ModelUser", back_populates="historico")
+    user = relationship("ModelUser", back_populates="historical")
 
     goal_id = Column(Integer, ForeignKey("goal.id"), nullable=True)
     goal = relationship("ModelGoal", back_populates="historico")
