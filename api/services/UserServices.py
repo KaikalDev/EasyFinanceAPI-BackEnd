@@ -144,3 +144,12 @@ class UsuarioService:
             raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
         return user.historical
+
+    async def logout(self, response: Response):
+      response.delete_cookie(
+          key="access_token",
+          httponly=True,
+          samesite="None",
+          secure=True
+      )
+      return {"msg": "Logout efetuado com sucesso"}

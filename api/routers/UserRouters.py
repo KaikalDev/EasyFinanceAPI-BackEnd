@@ -49,3 +49,8 @@ async def get_By_Token(user_id: int = Depends(get_user_id_from_token), db: Async
 async def get_historico(user_id: int = Depends(get_user_id_from_token), db: AsyncSession = Depends(get_db)):
     service = UsuarioService(db)
     return await service.getHistorico(user_id)
+
+@router.post("/logout")
+async def logout(response: Response, db: AsyncSession = Depends(get_db)):
+    service = UsuarioService(db)
+    return await service.logout(response)
