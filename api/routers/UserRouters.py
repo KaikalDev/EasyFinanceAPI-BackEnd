@@ -20,19 +20,19 @@ async def get_By_Id(id: int, db: AsyncSession = Depends(get_db)):
     return await service.getById(id)
 
 @router.delete("/delete/{id}")
-async def delete(id: int, db: AsyncSession = Depends(get_db)):
+async def delete(db: AsyncSession = Depends(get_db), id: int = Depends(get_user_id_from_token)):
     service = UsuarioService(db)
     return await service.deleteById(id)
 
 @router.put("/editNome/{id}", response_model=UserResponse)
-async def edit_nome(id: int, newName: str, db: AsyncSession = Depends(get_db)):
+async def edit_nome(newName: str, password: str, db: AsyncSession = Depends(get_db), id: int = Depends(get_user_id_from_token)):
     service = UsuarioService(db)
-    return await service.editNome(id, newName)
+    return await service.editNome(id, newName, password)
 
 @router.put("/editSenha/{id}", response_model=UserResponse)
-async def edit_senha(id: int, password: str, db: AsyncSession = Depends(get_db)):
+async def edit_senha(currentPassword: str, newPassword: str, db: AsyncSession = Depends(get_db), id: int = Depends(get_user_id_from_token)):
     service = UsuarioService(db)
-    user = await service.editSenha(id, password)
+    user = await service.editSenha(id, currentPassword, newPassword)
     return UserResponse.from_orm(user)
 
 @router.post("/login")

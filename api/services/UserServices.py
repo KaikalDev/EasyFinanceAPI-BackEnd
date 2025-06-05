@@ -82,19 +82,25 @@ class UsuarioService:
 
         return {"msg": "Login efetuado com sucesso"}
 
-    async def editNome(self, id: int, newName: str):
+    async def editNome(self, id: int, newName: str, password:str):
         user = await self.db.get(ModelUser, id)
         if not user:
             raise HTTPException(status_code=404, detail="user not found")
+        if not pwd_context.verify(password, user.password):
+            raise HTTPException(status_code=400, detail="senha atual incorreta")
         user.name = newName
         await self.db.commit()
         await self.db.refresh(user)
         return user
 
-    async def editSenha(self, id: int, newPassword: str):
+    async def editSenha(self, id: int, currentPassword: str, newPassword: str):
         user = await self.db.get(ModelUser, id)
         if not user:
             raise HTTPException(status_code=404, detail="user not found")
+        
+        if not pwd_context.verify(currentPassword, user.password):
+            raise HTTPException(status_code=400, detail="senha atual incorreta")
+        
         hashed_password = pwd_context.hash(newPassword)
         user.password = hashed_password
         await self.db.commit()
