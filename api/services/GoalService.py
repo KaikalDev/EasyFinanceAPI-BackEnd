@@ -12,8 +12,8 @@ class GoalService:
     async def create(self, goal: ModelGoal, userId: int):
         PiggyDb = ModelGoal(
             name=goal.name,
-            name=goal.GoalValue,
-            name=goal.CurrentValue,
+            GoalValue=goal.GoalValue,
+            CurrentValue=goal.CurrentValue,
             user_id=userId,
         )
         self.db.add(PiggyDb)

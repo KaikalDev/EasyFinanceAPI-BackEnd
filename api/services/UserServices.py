@@ -4,7 +4,11 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy import delete
 from fastapi import Response
-from api.data.models import ModelUser, ModelCategory, ModelGoal, ModelPiggybank, ModelTransaction
+from api.data.models.ModelUser import ModelUser
+from api.data.models.ModelTransaction import ModelTransaction
+from api.data.models.ModelCategory import ModelCategory
+from api.data.models.ModelGoal import ModelGoal
+from api.data.models.ModelLimit import ModelLimit
 from api.schemas.User import User
 from passlib.context import CryptContext
 from jose import jwt
@@ -115,7 +119,7 @@ class UsuarioService:
 
     async def deleteById(self, id: int):
         await self.db.execute(delete(ModelCategory).where(ModelCategory.user_id == id))
-        await self.db.execute(delete(ModelPiggybank).where(ModelPiggybank.user_id == id))
+        await self.db.execute(delete(ModelLimit).where(ModelLimit.user_id == id))
         await self.db.execute(delete(ModelTransaction).where(ModelTransaction.user_id == id))
         await self.db.execute(delete(ModelGoal).where(ModelGoal.user_id == id))
         query = delete(ModelUser).where(ModelUser.id == id)
@@ -133,4 +137,4 @@ class UsuarioService:
         if not user:
             raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-        return user.historico
+        return user.historical
