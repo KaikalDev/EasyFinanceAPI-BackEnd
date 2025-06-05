@@ -19,17 +19,17 @@ async def get_By_Id(id: int, db: AsyncSession = Depends(get_db)):
     service = UsuarioService(db)
     return await service.getById(id)
 
-@router.delete("/delete/{id}")
+@router.delete("/delete")
 async def delete(db: AsyncSession = Depends(get_db), id: int = Depends(get_user_id_from_token)):
     service = UsuarioService(db)
     return await service.deleteById(id)
 
-@router.put("/editNome/{id}", response_model=UserResponse)
+@router.put("/editNome", response_model=UserResponse)
 async def edit_nome(newName: str, password: str, db: AsyncSession = Depends(get_db), id: int = Depends(get_user_id_from_token)):
     service = UsuarioService(db)
     return await service.editNome(id, newName, password)
 
-@router.put("/editSenha/{id}", response_model=UserResponse)
+@router.put("/editSenha", response_model=UserResponse)
 async def edit_senha(currentPassword: str, newPassword: str, db: AsyncSession = Depends(get_db), id: int = Depends(get_user_id_from_token)):
     service = UsuarioService(db)
     user = await service.editSenha(id, currentPassword, newPassword)
