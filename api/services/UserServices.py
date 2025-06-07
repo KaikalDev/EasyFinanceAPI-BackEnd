@@ -136,7 +136,7 @@ class UsuarioService:
         return {"detail": "User deleted"}
     
     async def getHistorico(self, userId: int):
-        query = select(ModelUser).options(selectinload(ModelUser.historico)).where(ModelUser.id == userId)
+        query = select(ModelUser).options(selectinload(ModelUser.historical)).where(ModelUser.id == userId)
         result = await self.db.execute(query)
         user = result.scalar_one_or_none()
 
