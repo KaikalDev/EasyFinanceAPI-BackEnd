@@ -10,9 +10,12 @@ router = APIRouter()
 @router.post("/add", response_model=CategoryResponse)
 async def create(category: Category, db: AsyncSession = Depends(get_db), userId: int = Depends(get_user_id_from_token)):
     service = CategoryService(db)
-    return await service.create(category, userId)
+    try:
+        return await service.create(category, userId)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/getAll", response_model=list[CategoryResponse])
-async def get_All(db: AsyncSession = Depends(get_db), userId: int = Depends(get_user_id_from_token)):
+async def get_all(db: AsyncSession = Depends(get_db), userId: int = Depends(get_user_id_from_token)):
     service = CategoryService(db)
     return await service.getAll(userId)
