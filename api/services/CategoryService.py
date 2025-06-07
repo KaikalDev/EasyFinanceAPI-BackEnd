@@ -8,7 +8,7 @@ class CategoryService:
     
     async def create(self, category: ModelCategory, userId: int):
         db_category = ModelCategory(
-            goal_date=category.name,
+            name=category.name,
             user_id=userId,
         )
         self.db.add(db_category)
@@ -17,5 +17,6 @@ class CategoryService:
         return db_category
 
     async def getAll(self, userId: int):
-        category = await self.db.query(ModelCategory).filter(ModelCategory.user_id == userId).all()
-        return category
+        stmt = select(ModelCategory).where(ModelCategory.user_id == userId)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
