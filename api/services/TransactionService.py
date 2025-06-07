@@ -41,7 +41,7 @@ class TransactionService:
         tran.value = newTran.value
         tran.date = newTran.date
         tran.category = newTran.category
-        tran.cofrinho_id = newTran.cofrinho_id
+        tran.goal_id = newTran.goal_id
 
         await self.db.commit()
         await self.db.refresh(tran)
