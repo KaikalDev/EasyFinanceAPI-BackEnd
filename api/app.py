@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from api.routers import GoalRouters, LimitRouters, UserRouters, TransactionRouters
+from api.routers import GoalRouters, LimitRouters, UserRouters, TransactionRouters, CategoryRouters
 from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
@@ -22,6 +22,7 @@ app.include_router(UserRouters.router, prefix="/user", tags=["Usuario"])
 app.include_router(TransactionRouters.router, prefix="/transaction", tags=["Transaction"])
 app.include_router(LimitRouters.router, prefix="/limit", tags=["Limit"])
 app.include_router(GoalRouters.router, prefix="/goal", tags=["Goal"])
+app.include_router(CategoryRouters.router, prefix="/category", tags=["Category"])
 
 def custom_openapi():
     if app.openapi_schema:
