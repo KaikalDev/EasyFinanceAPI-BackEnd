@@ -1,3 +1,4 @@
+import select
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.data.models.ModelLimit import ModelLimit
@@ -55,5 +56,7 @@ class LimitService:
         return limit
 
     async def getAll(self, userId: int):
-        metas = await self.db.query(ModelLimit).filter(ModelLimit.user_id == userId).all()
+        stmt = select(ModelLimit).where(ModelLimit.user_id == userId)
+        result = await self.db.execute(stmt)
+        metas = result.scalars().all()
         return metas
