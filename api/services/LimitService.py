@@ -9,8 +9,8 @@ class LimitService:
     
     async def create(self, limit: ModelLimit, userId: int):
         db_limit = ModelLimit(
-            goal_date=limit.category,
-            goal_value=limit.value,
+            category=limit.category,
+            value=limit.value,
             user_id=userId,
         )
         self.db.add(db_limit)
@@ -58,5 +58,4 @@ class LimitService:
     async def getAll(self, userId: int):
         stmt = select(ModelLimit).where(ModelLimit.user_id == userId)
         result = await self.db.execute(stmt)
-        metas = result.scalars().all()
-        return metas
+        return result.scalars().all()
