@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.data.models.ModelGoal import ModelGoal
 from api.data.models.ModelTransaction import ModelTransaction
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy import delete
 
 class GoalService:
@@ -73,7 +74,11 @@ class GoalService:
         return historico
 
     async def getAll(self, userId: int):
-        stmt = select(ModelGoal).where(ModelGoal.user_id == userId)
+        stmt = (
+            select(ModelGoal)
+            .options(selectinload(ModelGoal.historico))  # <- Isso carrega o historico de uma vez
+            .where(ModelGoal.user_id == userId)
+        )
         result = await self.db.execute(stmt)
         metas = result.scalars().all()
         return metas
