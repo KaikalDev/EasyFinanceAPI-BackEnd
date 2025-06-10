@@ -73,5 +73,7 @@ class GoalService:
         return historico
 
     async def getAll(self, userId: int):
-        metas = await self.db.query(ModelGoal).filter(ModelGoal.user_id == userId).all()
+        stmt = select(ModelGoal).where(ModelGoal.user_id == userId)
+        result = await self.db.execute(stmt)
+        metas = result.scalars().all()
         return metas
