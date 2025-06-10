@@ -23,7 +23,7 @@ class TransactionService:
             if goal.user_id != userId:
                 raise HTTPException(status_code=403, detail="Acesso negado à meta")
 
-            goal.currentValue += tran.value
+            goal.CurrentValue += tran.value
         self.db.add(db_tran)
         await self.db.commit()
         await self.db.refresh(db_tran)
