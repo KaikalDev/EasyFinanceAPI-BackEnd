@@ -10,12 +10,14 @@ class Goal(BaseModel):
     class Config:
         from_attributes = True
 
+
 class GoalResponse(BaseModel):
     id: int
     name: str
-    total: float
+    GoalValue: float
+    CurrentValue: float
     user_id: int
-    historico: list[Transaction]
+    historico: List[Transaction]  # usando typing.List por clareza
 
     class Config:
         from_attributes = True
