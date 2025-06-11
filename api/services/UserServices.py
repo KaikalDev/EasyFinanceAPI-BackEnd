@@ -1,3 +1,4 @@
+import uuid
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -26,7 +27,8 @@ class UsuarioService:
             payload = {
                 "sub": str(user.id),
                 "email": user.email,
-                "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+                "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+                "jti": str(uuid.uuid4())  # <- ID único pro token
             }
             return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
         except Exception as e:
