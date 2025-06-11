@@ -12,7 +12,6 @@ from api.data.models.ModelGoal import ModelGoal
 from api.data.models.ModelLimit import ModelLimit
 from api.schemas.User import User
 from passlib.context import CryptContext
-from jose import jwt
 from datetime import datetime, timedelta
 from api.utils.config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
 
@@ -28,7 +27,7 @@ class UsuarioService:
                 "sub": str(user.id),
                 "email": user.email,
                 "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
-                "jti": str(uuid.uuid4())  # <- ID único pro token
+                "jti": str(uuid.uuid4())
             }
             return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
         except Exception as e:
@@ -44,14 +43,6 @@ class UsuarioService:
             self.db.add(userToAdd)
             await self.db.flush()
             await self.db.refresh(userToAdd)
-
-            categorias = [
-                "Alimentação", "Aluguel", "Saúde", "Lazer", "Água", "Luz", "Internet"
-            ]
-            categorias_obj = [
-                ModelCategory(user_id=userToAdd.id, name=cat) for cat in categorias
-            ]
-            self.db.add_all(categorias_obj)
 
             await self.db.commit()
             await self.db.refresh(userToAdd)
