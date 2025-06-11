@@ -9,9 +9,6 @@ class Transaction(BaseModel):
     category: str
     goal_id: Optional[int] = None
 
-    class Config:
-        from_attributes = True
-
 class TransactionResponse(BaseModel):
     id: int
     type: str
@@ -20,5 +17,6 @@ class TransactionResponse(BaseModel):
     category: str
     goal_id: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }

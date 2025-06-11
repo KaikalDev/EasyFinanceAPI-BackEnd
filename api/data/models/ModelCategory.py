@@ -10,5 +10,6 @@ class ModelCategory(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    transactions = relationship("ModelTransaction", back_populates="category")
 
     user = relationship("ModelUser", back_populates="categories")

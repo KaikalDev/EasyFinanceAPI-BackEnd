@@ -12,7 +12,9 @@ class ModelTransaction(Base):
     type = Column(String, nullable=False)
     value = Column(Float, nullable=False)
     date = Column(DateTime, default=datetime.utcnow)
-    category = Column(String, nullable=False)
+
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+    category = relationship("ModelCategory", back_populates="transactions")
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("ModelUser", back_populates="historical")

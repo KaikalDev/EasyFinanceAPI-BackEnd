@@ -17,7 +17,10 @@ class GoalResponse(BaseModel):
     GoalValue: float
     CurrentValue: float
     user_id: int
-    historico: List[Transaction]  # usando typing.List por clareza
+    historico: List[Transaction]
 
     class Config:
         from_attributes = True
+class GoalEditRequest(BaseModel):
+    newName: str
+    newGoal: float

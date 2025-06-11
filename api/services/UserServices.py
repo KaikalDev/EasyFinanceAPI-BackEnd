@@ -22,134 +22,186 @@ class UsuarioService:
         self.db = db
 
     def _criar_token(self, user: ModelUser):
-        payload = {
-            "sub": str(user.id),
-            "email": user.email,
-            "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        }
-        return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        try:
+            payload = {
+                "sub": str(user.id),
+                "email": user.email,
+                "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            }
+            return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Erro ao gerar token")
 
     async def create(self, user: User, response: Response):
-        hashed = pwd_context.hash(user.password)
-        data = user.dict()
-        data["password"] = hashed
+        try:
+            hashed = pwd_context.hash(user.password)
+            data = user.dict()
+            data["password"] = hashed
 
-        userToAdd = ModelUser(**data)
-        self.db.add(userToAdd)
-        await self.db.flush()
+            userToAdd = ModelUser(**data)
+            self.db.add(userToAdd)
+            await self.db.flush()
+            await self.db.refresh(userToAdd)
 
-        await self.db.refresh(userToAdd)
+            categorias = [
+                "Alimentação", "Aluguel", "Saúde", "Lazer", "Água", "Luz", "Internet"
+            ]
+            categorias_obj = [
+                ModelCategory(user_id=userToAdd.id, name=cat) for cat in categorias
+            ]
+            self.db.add_all(categorias_obj)
 
-        categorias = [
-            "Alimantação", "Aluguel", "Saúde", "Lazer",
-            "Cofrinho", "Agua", "Luz", "Internet"
-        ]
-        categorias_obj = [
-            ModelCategory(user_id=userToAdd.id, name=cat) for cat in categorias
-        ]
-        self.db.add_all(categorias_obj)
+            await self.db.commit()
+            await self.db.refresh(userToAdd)
 
-        await self.db.commit()
-        await self.db.refresh(userToAdd)
+            token = self._criar_token(userToAdd)
+            response.set_cookie(
+                key="access_token",
+                value=token,
+                httponly=True,
+                max_age=60 * 60 * 24 * 7,
+                samesite="None",
+                secure=True
+            )
 
-        token = self._criar_token(userToAdd)
-        response.set_cookie(
-            key="access_token",
-            value=token,
-            httponly=True,
-            max_age=60 * 60 * 24 * 7,
-            samesite="None",
-            secure=True
-        )
-
-        return {"msg": "Usuário criado com sucesso"}
+            return {"msg": "Usuário criado com sucesso"}
+        except Exception as e:
+            await self.db.rollback()
+            raise HTTPException(status_code=500, detail="Erro ao criar usuário")
 
     async def login(self, email: str, password: str, response: Response):
-        result = await self.db.execute(select(ModelUser).where(ModelUser.email == email))
-        user = result.scalar_one_or_none()
-        if not user or not pwd_context.verify(password, user.password):
-            raise HTTPException(status_code=401, detail="Email ou senha inválidos")
+        try:
+            result = await self.db.execute(select(ModelUser).where(ModelUser.email == email))
+            user = result.scalar_one_or_none()
+            if not user or not pwd_context.verify(password, user.password):
+                raise HTTPException(status_code=401, detail="Email ou senha inválidos")
 
-        token = self._criar_token(user)
-        response.set_cookie(
-            key="access_token",
-            value=token,
-            httponly=True,
-            max_age=60 * 60 * 24 * 7,
-            samesite="None",
-            secure=True
-        )
+            token = self._criar_token(user)
+            response.set_cookie(
+                key="access_token",
+                value=token,
+                httponly=True,
+                max_age=60 * 60 * 24 * 7,
+                samesite="None",
+                secure=True
+            )
 
-        return {"msg": "Login efetuado com sucesso"}
+            return {"msg": token}
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=500, detail="Erro ao realizar login")
 
-    async def editNome(self, id: int, newName: str, password:str):
-        user = await self.db.get(ModelUser, id)
-        if not user:
-            raise HTTPException(status_code=404, detail="user not found")
-        if not pwd_context.verify(password, user.password):
-            raise HTTPException(status_code=400, detail="senha atual incorreta")
-        user.name = newName
-        await self.db.commit()
-        await self.db.refresh(user)
-        return user
+    async def editNome(self, id: int, newName: str, password: str):
+        try:
+            user = await self.db.get(ModelUser, id)
+            if not user:
+                raise HTTPException(status_code=404, detail="user not found")
+            if not pwd_context.verify(password, user.password):
+                raise HTTPException(status_code=400, detail="senha atual incorreta")
+
+            user.name = newName
+            await self.db.commit()
+            await self.db.refresh(user)
+            return user
+        except HTTPException:
+            raise
+        except Exception:
+            await self.db.rollback()
+            raise HTTPException(status_code=500, detail="Erro ao editar nome")
 
     async def editSenha(self, id: int, currentPassword: str, newPassword: str):
-        user = await self.db.get(ModelUser, id)
-        if not user:
-            raise HTTPException(status_code=404, detail="user not found")
-        
-        if not pwd_context.verify(currentPassword, user.password):
-            raise HTTPException(status_code=400, detail="senha atual incorreta")
-        
-        hashed_password = pwd_context.hash(newPassword)
-        user.password = hashed_password
-        await self.db.commit()
-        await self.db.refresh(user)
-        return user
+        try:
+            user = await self.db.get(ModelUser, id)
+            if not user:
+                raise HTTPException(status_code=404, detail="user not found")
+            if not pwd_context.verify(currentPassword, user.password):
+                raise HTTPException(status_code=400, detail="senha atual incorreta")
+
+            hashed_password = pwd_context.hash(newPassword)
+            user.password = hashed_password
+            await self.db.commit()
+            await self.db.refresh(user)
+            return user
+        except HTTPException:
+            raise
+        except Exception:
+            await self.db.rollback()
+            raise HTTPException(status_code=500, detail="Erro ao alterar senha")
 
     async def getById(self, id: int):
-        result = await self.db.execute(select(ModelUser).where(ModelUser.id == id))
-        user = result.scalar_one_or_none()
-
-        if not user:
-            raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-        return user
+        try:
+            result = await self.db.execute(select(ModelUser).where(ModelUser.id == id))
+            user = result.scalar_one_or_none()
+            if not user:
+                raise HTTPException(status_code=404, detail="Usuário não encontrado")
+            return user
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=500, detail="Erro ao buscar usuário")
 
     async def verificaSenha(self, email: str, password: str):
-        result = await self.db.execute(select(ModelUser).where(ModelUser.email == email))
-        usuario = result.scalar_one_or_none()
-        if usuario and pwd_context.verify(password, usuario.password):
-            return usuario
-        return None
+        try:
+            result = await self.db.execute(select(ModelUser).where(ModelUser.email == email))
+            usuario = result.scalar_one_or_none()
+            if usuario and pwd_context.verify(password, usuario.password):
+                return usuario
+            return None
+        except Exception:
+            return None
 
     async def deleteById(self, id: int):
-        await self.db.execute(delete(ModelCategory).where(ModelCategory.user_id == id))
-        await self.db.execute(delete(ModelLimit).where(ModelLimit.user_id == id))
-        await self.db.execute(delete(ModelTransaction).where(ModelTransaction.user_id == id))
-        await self.db.execute(delete(ModelGoal).where(ModelGoal.user_id == id))
-        query = delete(ModelUser).where(ModelUser.id == id)
-        result = await self.db.execute(query)
-        await self.db.commit()
-        if result.rowcount == 0:
-            raise Exception("user not found")
-        return {"detail": "User deleted"}
-    
-    async def getHistorico(self, userId: int):
-        query = select(ModelUser).options(selectinload(ModelUser.historical)).where(ModelUser.id == userId)
-        result = await self.db.execute(query)
-        user = result.scalar_one_or_none()
+        try:
+            await self.db.execute(delete(ModelCategory).where(ModelCategory.user_id == id))
+            await self.db.execute(delete(ModelLimit).where(ModelLimit.user_id == id))
+            await self.db.execute(delete(ModelTransaction).where(ModelTransaction.user_id == id))
+            await self.db.execute(delete(ModelGoal).where(ModelGoal.user_id == id))
+            query = delete(ModelUser).where(ModelUser.id == id)
+            result = await self.db.execute(query)
+            await self.db.commit()
+            if result.rowcount == 0:
+                raise HTTPException(status_code=404, detail="Usuário não encontrado")
+            return {"detail": "User deleted"}
+        except HTTPException:
+            raise
+        except Exception:
+            await self.db.rollback()
+            raise HTTPException(status_code=500, detail="Erro ao deletar usuário")
 
-        if not user:
-            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    async def getHistorico(self, user_id: int):
+        try:
+            query = (
+                select(ModelTransaction)
+                .where(ModelTransaction.user_id == user_id)
+                .options(selectinload(ModelTransaction.category))
+            )
+            result = await self.db.execute(query)
+            transactions = result.scalars().all()
 
-        return user.historical
+            response = []
+            for tran in transactions:
+                response.append({
+                    "id": tran.id,
+                    "type": tran.type,
+                    "value": tran.value,
+                    "date": tran.date.isoformat() if hasattr(tran.date, 'isoformat') else tran.date,
+                    "category": tran.category.name if tran.category else None,
+                    "goal_id": tran.goal_id,
+                })
+
+            return response
+        except Exception:
+            raise HTTPException(status_code=500, detail="Erro ao buscar histórico de transações")
 
     async def logout(self, response: Response):
-      response.delete_cookie(
-          key="access_token",
-          httponly=True,
-          samesite="None",
-          secure=True
-      )
-      return {"msg": "Logout efetuado com sucesso"}
+        try:
+            response.delete_cookie(
+                key="access_token",
+                httponly=True,
+                samesite="None",
+                secure=True
+            )
+            return {"msg": "Logout efetuado com sucesso"}
+        except Exception:
+            raise HTTPException(status_code=500, detail="Erro ao efetuar logout")
