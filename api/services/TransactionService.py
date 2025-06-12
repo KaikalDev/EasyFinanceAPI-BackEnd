@@ -36,7 +36,10 @@ class TransactionService:
                 category_name_cap = f"Meta: {goal.name.capitalize()}"
 
             result = await self.db.execute(
-                select(ModelCategory).where(ModelCategory.name == category_name_cap)
+                select(ModelCategory).where(
+                    ModelCategory.name == category_name_cap,
+                    ModelCategory.user_id == userId
+                )
             )
             category_obj = result.scalars().first()
 
